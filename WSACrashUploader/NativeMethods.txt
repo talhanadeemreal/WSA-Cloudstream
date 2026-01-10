@@ -1,0 +1,3 @@
+GetClassName
+EnumWindows
+GetWindowThreadProcessId
