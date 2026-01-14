@@ -1,7 +1,6 @@
 *.vhdx
 Output/
 *.log
-*.exe
 !WsaService/WsaService.exe
 !WsaSettingsBroker/WsaSettingsBroker.exe
 !WsaSettings.exe

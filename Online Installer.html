@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudStream Setup</title>
+    <style>
+        :root {
+            /* Black theme background matching the logo source */
+            --bg-color: #000000;
+            --card-bg: #111111;
+            --text-main: #ffffff;
+            --text-dim: #a1a1a1;
+            /* Blue accents derived from the cloud logo source */
+            --accent-color: #3b82f6;
+            --accent-dark: #1e40af;
+            --section-bg: #1a1a1a;
+            --status-wait: #f59e0b;
+            --status-ok: #4ade80;
+            --status-err: #ef4444;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        /* Installer Window */
+        .installer-window {
+            width: 700px;
+            height: 550px;
+            background-color: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.2);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #222;
+            cursor: default;
+        }
+
+        .logo-container {
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .app-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            padding: 30px 40px;
+            overflow-y: auto;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        h3 {
+            font-size: 1rem;
+            color: #fff;
+            margin-top: 0;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        p,
+        li {
+            color: var(--text-dim);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* Fun Text Styling */
+        .highlight {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .fun-intro {
+            font-size: 1.05rem;
+            margin-bottom: 20px;
+        }
+
+        /* List Styling */
+        .req-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .req-list li {
+            margin-bottom: 8px;
+            border-left: 3px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        /* Info Box for Page 3 */
+        .info-box {
+            background-color: var(--section-bg);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+        }
+
+        .info-box ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .info-box li {
+            color: #ccc;
+            margin-bottom: 5px;
+        }
+
+        /* Input Styles */
+        .path-input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            background: #222;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+        }
+
+        .btn-browse {
+            padding: 10px 15px;
+            background: #333;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 20px;
+            border-top: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #0a0a0a;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .credits-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 22px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-dark);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid #444;
+            color: var(--text-dim);
+        }
+
+        .btn-secondary:hover {
+            border-color: #666;
+            color: #fff;
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        .btn-credit {
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #888;
+            text-decoration: none;
+            display: inline-block;
+            border-radius: 4px;
+        }
+
+        .btn-credit:hover {
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        /* Progress Bar */
+        .progress-wrapper {
+            margin-top: 30px;
+            display: none;
+            /* Hidden until install starts */
+        }
+
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .status-text {
+            color: #fff;
+        }
+
+        .status-percent {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .progress-container {
+            background: #222;
+            border-radius: 10px;
+            height: 10px;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-color), #60a5fa);
+            transition: width 0.1s linear;
+        }
+
+        /* Post-Install Guide Styles */
+        .guide-image-wrapper {
+            padding-left: 0;
+            padding-right: 0;
+            margin: 5px 0;
+            width: 100%;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .guide-img {
+            width: auto;
+            max-width: 100%;
+            max-height: 180px;
+            display: block;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            object-fit: contain;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #4ade80;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .process-status {
+            margin-top: 20px;
+            padding: 12px;
+            background: #151515;
+            border: 1px solid #333;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            color: #aaa;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--status-wait);
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-dot.success {
+            background: var(--status-ok);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.4;
+            }
+        }
+
+        .install-log-container {
+            margin-top: 15px;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 6px;
+            height: 150px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .install-log {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #4ade80;
+            line-height: 1.6;
+        }
+
+        .install-log-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .install-log-container::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        .install-log-container::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        .install-log-container::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="installer-window">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-container">
+                <img src="Untitled.png" alt="Cloud Logo" class="logo-img">
+            </div>
+            <div class="app-title">CloudStream Installer</div>
+        </div>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="content">
+
+            <!-- PAGE 1: Main Screen -->
+            <div id="page-1" class="page active">
+                <h2>Ready to Binge?</h2>
+
+                <p class="fun-intro">
+                    You are seconds away from unlocking <span class="highlight">ad-free 4K movies</span> and global
+                    content right on your desktop.
+                </p>
+
+                <p>
+                    Forget the subscriptions and the buffering. Sit back, relax, and let us handle the heavy lifting.
+                </p>
+
+                <p style="margin-top: 25px; font-style: italic; color: #888;">
+                    Click <strong>Next</strong> to get the popcorn ready!
+                </p>
+
+                <div style="margin-top: 40px; text-align: right; opacity: 0.2;">
+                    <svg width="60" height="35" viewBox="0 0 100 60">
+                        <path
+                            d="M 20 45 Q 10 45 10 35 Q 10 25 20 25 Q 25 10 45 10 Q 60 10 65 25 Q 80 20 85 35 Q 90 45 80 45 Z"
+                            fill="#3b82f6" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- PAGE 2: System Requirements -->
+            <div id="page-2" class="page">
+                <h2>System Prerequisites</h2>
+                <p>Please ensure your PC meets these specific requirements:</p>
+                <ul class="req-list">
+                    <li><strong>OS:</strong> Windows 10 Build 19041+ or Windows 11</li>
+                    <li><strong>Processor:</strong> 64-bit with Virtualization Support</li>
+                    <li><strong>Memory:</strong> At least 8GB RAM (16GB recommended)</li>
+                    <li><strong>Storage:</strong> 3 GB free disk space</li>
+                    <li><strong>Permissions:</strong> Administrator privileges required</li>
+                </ul>
+            </div>
+
+            <!-- PAGE 3: Installation Details -->
+            <div id="page-3" class="page">
+                <h2>Setup Details</h2>
+
+                <div class="info-box">
+                    <h3>Installation Notes</h3>
+                    <ul>
+                        <li>Virtual Machine Platform will be enabled automatically.</li>
+                        <li>System restart may be required to finalize setup.</li>
+                        <li>Installation takes approximately 10-15 minutes.</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <h3>What Will Be Installed</h3>
+                    <ul>
+                        <li>Windows Subsystem for Android (WSA)</li>
+                        <li>CloudStream Application</li>
+                        <li>Desktop shortcut for quick access</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- PAGE 4: Select Destination -->
+            <div id="page-4" class="page">
+                <h2>Where to Install?</h2>
+                <p>Choose a home for CloudStream:</p>
+                <div class="path-input-group">
+                    <input type="text" value="C:\Program Files\CloudStream" readonly>
+                    <button class="btn-browse">Browse...</button>
+                </div>
+                <p style="margin-top: 20px; font-size: 0.85rem;">
+                    Space Required: 3.0 GB
+                </p>
+            </div>
+
+            <!-- PAGE 5: Ready to Install -->
+            <div id="page-5" class="page">
+                <h2>Ready to Launch</h2>
+                <p id="final-message">We have everything we need. Click <strong>Install</strong> to begin the online
+                    setup.</p>
+                <p id="final-submessage" style="font-size: 0.9rem; color: #888;">The installer will download necessary
+                    files from the cloud.</p>
+
+                <div class="progress-wrapper" id="install-progress">
+                    <div class="status-header">
+                        <span class="status-text" id="status-text">Initializing...</span>
+                        <span class="status-percent" id="status-percent">0%</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progress-bar-fill"></div>
+                    </div>
+                    <div class="install-log-container">
+                        <div id="install-log" class="install-log"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 6: Check 1 (WsaClient) - NEW -->
+            <div id="page-6" class="page">
+                <h2>Finalizing Setup (1/2)</h2>
+                <div class="guide-image-wrapper">
+                    <img src="image_417f8e.png" alt="Dialogue Box Guide" class="guide-img"
+                        onerror="this.style.display='none';">
+                </div>
+                <div class="process-status">
+                    <div><span class="status-dot" id="status-dot-1"></span><span id="status-text-1">Waiting for
+                            WsaClient.exe...</span></div>
+                </div>
+            </div>
+
+            <!-- PAGE 7: Check 2 (WsaService) - NEW -->
+            <div id="page-7" class="page">
+                <h2>Finalizing Setup (2/2)</h2>
+                <div class="guide-image-wrapper">
+                    <img src="image_417cc4.png" alt="WSA Loading Guide" class="guide-img"
+                        onerror="this.style.display='none';">
+                    <div class="loading-overlay"></div>
+                </div>
+                <p style="text-align: center; margin-top: 10px;">Initializing Windows Subsystem for Android...</p>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <!-- CREDITS -->
+            <div class="credits-area">
+                <a href="https://discord.gg/5Hus6fM" target="_blank" class="btn-credit">
+                    Join Community
+                </a>
+                <a href="https://theothertalha.lovable.app/" target="_blank" class="btn-credit">
+                    PC Version: Talha Nadeem
+                </a>
+            </div>
+
+            <!-- NAVIGATION -->
+            <div class="nav-area">
+                <button id="btn-back" class="btn-secondary" onclick="prevPage()" disabled>Back</button>
+                <button id="btn-next" class="btn-primary" onclick="nextPage()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const totalPages = 7; // Updated to 7 for online flow
+        let checkInterval;
+
+        // Global variables to handle cancellation
+        let installInterval = null;
+        let isInstalling = false;
+
+        // Detect if running in C# Wrapper
+        const isRealInstaller = (window.chrome && window.chrome.webview);
+
+        // --- C# MESSAGE LISTENER ---
+        if (isRealInstaller) {
+            window.chrome.webview.addEventListener('message', event => {
+                const msg = event.data;
+
+                // Handle Progress from C# (Download/Extract)
+                if (typeof msg === 'string' && msg.startsWith("Progress:")) {
+                    const percent = parseInt(msg.split(":")[1]);
+                    document.getElementById('progress-bar-fill').style.width = percent + '%';
+                    document.getElementById('status-percent').innerText = percent + '%';
+
+                    if (percent >= 100) {
+                        setTimeout(() => { currentPage = 6; updateUI(); }, 1000);
+                    }
+                }
+                // Handle Process Checks
+                else if (typeof msg === 'string' && msg.startsWith("ProcessFound:")) {
+                    const parts = msg.split(":");
+                    const procName = parts[1];
+                    const found = parts[2] === 'true';
+                    if (found) {
+                        clearInterval(checkInterval);
+                        if (procName === "WsaClient") {
+                            // Passed Step 1 -> Move to Step 2
+                            const statusText = document.getElementById('status-text-1');
+                            const statusDot = document.getElementById('status-dot-1');
+                            statusText.textContent = "Client Launched!"; statusText.style.color = "#4ade80"; statusDot.classList.add('success');
+                            setTimeout(() => { currentPage = 7; updateUI(); }, 1000);
+                        } else if (procName === "WsaService") {
+                            // Passed Step 2 -> Finish
+                            const statusText = document.getElementById('status-text-2');
+                            const statusDot = document.getElementById('status-dot-2');
+                            const nextBtn = document.getElementById('btn-next');
+                            statusText.textContent = "WSA Services Running!"; statusText.style.color = "#4ade80"; statusDot.classList.add('success');
+                            nextBtn.textContent = "Finish"; nextBtn.disabled = false; nextBtn.onclick = () => window.chrome.webview.postMessage("CloseApp");
+                        }
+                    }
+                }
+                // Handle Install Logs
+                else if (typeof msg === 'string' && msg.startsWith("InstallLog:")) {
+                    const logMessage = msg.substring("InstallLog:".length);
+                    const logContainer = document.getElementById('install-log');
+                    if (logContainer) {
+                        const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+                        const logEntry = document.createElement('div');
+                        logEntry.textContent = `[${timestamp}] ${logMessage}`;
+                        logContainer.appendChild(logEntry);
+                        const logContainerParent = logContainer.parentElement;
+                        if (logContainerParent) {
+                            logContainerParent.scrollTop = logContainerParent.scrollHeight;
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateUI() {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`page-${currentPage}`).classList.add('active');
+
+            // Logic for Back Button
+            const backBtn = document.getElementById('btn-back');
+            const nextBtn = document.getElementById('btn-next');
+
+            // Reset defaults
+            backBtn.disabled = false;
+            backBtn.style.display = 'inline-block';
+            nextBtn.style.display = 'inline-block';
+            nextBtn.disabled = false;
+
+            if (currentPage === 1) {
+                backBtn.disabled = true;
+                backBtn.textContent = "Back";
+                backBtn.onclick = prevPage;
+                nextBtn.textContent = "Next";
+                nextBtn.onclick = nextPage;
+            }
+            else if (currentPage === 4) {
+                nextBtn.textContent = "Install";
+                nextBtn.onclick = nextPage; // Corrected: Just go to next page
+            }
+            else if (currentPage === 5) { // Installing
+                nextBtn.textContent = "Install";
+                nextBtn.setAttribute('onclick', 'startOnlineInstall()');
+            }
+            else if (currentPage === 6) { // Check WsaClient
+                backBtn.style.display = 'none';
+                nextBtn.textContent = "Waiting...";
+                nextBtn.disabled = true;
+
+                if (isRealInstaller) {
+                    checkInterval = setInterval(() => { window.chrome.webview.postMessage("CheckProcess:WsaClient"); }, 2000);
+                } else {
+                    // Simulation
+                    setTimeout(() => { currentPage = 7; updateUI(); }, 3000);
+                }
+            }
+            else if (currentPage === 7) { // Check WsaService
+                backBtn.style.display = 'none';
+                nextBtn.textContent = "Finalizing...";
+                nextBtn.disabled = true;
+
+                if (isRealInstaller) {
+                    checkInterval = setInterval(() => { window.chrome.webview.postMessage("CheckProcess:WsaService"); }, 2000);
+                } else {
+                    // Simulation
+                    setTimeout(() => {
+                        nextBtn.textContent = "Finish";
+                        nextBtn.disabled = false;
+                        nextBtn.onclick = () => alert("Done");
+                    }, 3000);
+                }
+            }
+            else {
+                backBtn.textContent = "Back";
+                backBtn.onclick = prevPage;
+                nextBtn.textContent = "Next";
+                nextBtn.onclick = nextPage;
+            }
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateUI();
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                updateUI();
+            }
+        }
+
+        // Helper to run a progress bar stage (Simulation Only)
+        function runStage(label, speedMultiplier, callback) {
+            if (!isInstalling) return;
+
+            const bar = document.getElementById('progress-bar-fill');
+            const statusText = document.getElementById('status-text');
+            const statusPercent = document.getElementById('status-percent');
+
+            statusText.innerText = label;
+            let width = 0;
+            bar.style.width = '0%';
+
+            installInterval = setInterval(() => {
+                let increment = Math.random() * speedMultiplier;
+                width += increment;
+
+                if (width >= 100) {
+                    width = 100;
+                    bar.style.width = '100%';
+                    statusPercent.innerText = '100%';
+                    clearInterval(installInterval);
+                    setTimeout(() => { if (isInstalling) callback(); }, 600);
+                } else {
+                    bar.style.width = width + '%';
+                    statusPercent.innerText = Math.floor(width) + '%';
+                }
+            }, 50);
+        }
+
+        function startOnlineInstall() {
+            isInstalling = true;
+
+            const btn = document.getElementById('btn-next');
+            const backBtn = document.getElementById('btn-back');
+
+            // Disable "Next/Install" button while working
+            btn.disabled = true;
+            btn.textContent = "Working...";
+
+            // TRANSFORM BACK BUTTON TO CANCEL BUTTON
+            backBtn.disabled = false;
+            backBtn.textContent = "Cancel";
+            backBtn.onclick = cancelInstall;
+
+            // Show progress UI, hide text
+            document.getElementById('install-progress').style.display = 'block';
+            document.getElementById('final-message').style.display = 'none';
+            document.getElementById('final-submessage').style.display = 'none';
+
+            if (isRealInstaller) {
+                // TRIGGER C# DOWNLOAD LOGIC
+                window.chrome.webview.postMessage("StartOnlineInstall");
+            } else {
+                // SIMULATION FLOW
+                runStage("Downloading files from server (1.2 GB)...", 1.5, () => {
+                    runStage("Extracting WSA package...", 3.0, () => {
+                        runStage("Installing CloudStream...", 2.0, () => {
+                            isInstalling = false;
+                            setTimeout(() => { currentPage = 6; updateUI(); }, 1000);
+                        });
+                    });
+                });
+            }
+        }
+
+        function cancelInstall() {
+            isInstalling = false;
+            clearInterval(installInterval);
+
+            const btn = document.getElementById('btn-next');
+            const backBtn = document.getElementById('btn-back');
+
+            document.getElementById('install-progress').style.display = 'none';
+            document.getElementById('progress-bar-fill').style.width = '0%';
+
+            document.getElementById('final-message').style.display = 'block';
+            document.getElementById('final-submessage').style.display = 'block';
+
+            btn.textContent = "Install";
+            btn.disabled = false;
+            btn.setAttribute('onclick', 'startOnlineInstall()');
+
+            backBtn.textContent = "Back";
+            backBtn.disabled = false;
+            backBtn.onclick = prevPage;
+
+            alert("Installation was cancelled.");
+        }
+    </script>
+
+</body>
+
+</html>
